@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Game</title>
+    <style media="screen">
+      body {
+        margin: 0;
+        font-family: Helvetica, Arial, sans-serif;
+        text-align: center;
+      }
+
+      canvas {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="240" height="240"></canvas>
+
+    <div id="info"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/lib/mousetrap.min.js"></script>
+
+    <script src="/components/uuid.js"></script>
+    <script src="/components/client.js"></script>
+    <script src="/components/sprite.js"></script>
+
+    <script src="/components/world.js"></script>
+    <script src="/components/tile.js"></script>
+    <script src="/components/figure.js"></script>
+    <script src="/components/explosion.js"></script>
+    <script src="/components/bomb.js"></script>
+    <script src="/constants.js"></script>
+    <script src="/index.js"></script>
+  </body>
+</html>
