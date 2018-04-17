@@ -66,6 +66,7 @@ Promise.all([
   audioPlayer.play('bg-2')
 
   leaveButton.addEventListener('click', (event) => {
+    audioPlayer.play('click')
     audioPlayer.stop('bg')
     audioPlayer.play('bg-2')
     joinForm.style.display = 'flex';
@@ -81,6 +82,8 @@ Promise.all([
 
   joinForm.addEventListener('submit', (event) => {
     event.preventDefault();
+
+    audioPlayer.play('click')
 
     if(usernameInput.value.trim()) {
       client = new Client(usernameInput.value);
