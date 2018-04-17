@@ -9,6 +9,8 @@ class Bomb {
 
     this.timer = options.timer;
 
+    this.detonated = options.detonated;
+
     this.x = options.x;
     this.y = options.y;
 

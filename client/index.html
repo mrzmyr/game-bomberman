@@ -3,23 +3,42 @@
   <head>
     <meta charset="utf-8">
     <title>Game</title>
-    <style media="screen">
-      body {
-        margin: 0;
-        font-family: Helvetica, Arial, sans-serif;
-        text-align: center;
-      }
-
-      canvas {
-        margin-top: 20px;
-        margin-bottom: 20px;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <canvas id="canvas" width="240" height="240"></canvas>
+    <div id="info">
+      <div id="latency"></div>
+      <div id="player-stats"></div>
+    </div>
 
-    <div id="info"></div>
+    <div id="game">
+      <h1 id="headline" class="animate">
+        <span>B</span>
+        <span>O</span>
+        <span>M</span>
+        <span>B</span>
+        <span>E</span>
+        <span>R</span>
+        <span>M</span>
+        <span>A</span>
+        <span>N</span>
+      </h1>
+
+      <canvas id="canvasOrg" width="240" height="240"></canvas>
+      <canvas id="canvasTmp" width="240" height="240"></canvas>
+      <canvas id="canvasBg" width="240" height="240"></canvas>
+
+      <form id="join-form">
+        <input type="text" required autofocus placeholder="username" id="username">
+        <button id="join">Join</button>
+      </form>
+
+      <div id="game-menu">
+        <button id="leave">leave & clear stats</button>
+        <button id="mute">Mute</button>
+      </div>
+
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/lib/mousetrap.min.js"></script>
@@ -27,13 +46,14 @@
     <script src="/components/uuid.js"></script>
     <script src="/components/client.js"></script>
     <script src="/components/sprite.js"></script>
+    <script src="/components/audio-player.js"></script>
 
     <script src="/components/world.js"></script>
     <script src="/components/tile.js"></script>
     <script src="/components/figure.js"></script>
     <script src="/components/explosion.js"></script>
     <script src="/components/bomb.js"></script>
-    <script src="/constants.js"></script>
+    <script src="../constants.js"></script>
     <script src="/index.js"></script>
   </body>
 </html>

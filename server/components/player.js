@@ -1,21 +1,21 @@
 module.exports = class Player {
   constructor(options) {
     this.id = options.id;
+    this.username = options.username;
+    this.color = options.color;
+    
     this.x = options.x;
     this.y = options.y;
     this.width = options.width;
     this.height = options.height;
     this.type = options.type;
-    this.number = options.number;
 
     this.dead = false;
-    this.dies = 0;
     this.timeout = 0; // timeout until resurrect
   }
 
   kill() {
     this.dead = true;
-    this.dies++;
   }
 
   resurrect(x, y) {
@@ -26,11 +26,15 @@ module.exports = class Player {
 
   serialize() {
     return {
+      id: this.id,
+      username: this.username,
+      stats: this.stats,
+      dead: this.dead,
       x: this.x,
       y: this.y,
+      color: this.color,
       type: this.type,
-      dead: this.dead,
-      dies: this.dies
+      direction: this.direction
     }
   }
 }

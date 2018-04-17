@@ -1,4 +1,4 @@
-class Tile {
+module.exports = class Tile {
   constructor(options) {
     this.type = options.type;
 
@@ -9,5 +9,3 @@ class Tile {
     this.y = options.y;
   }
 }
-
-module.exports = Tile;

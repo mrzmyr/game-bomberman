@@ -1,55 +1,39 @@
+const TEXTURE_TYPE_TOP_X = 16 * 14;
+const TEXTURE_TYPE_TOP_Y = 16 * 0;
+const TEXTURE_TYPE_LEFT_X = 16 * 0;
+const TEXTURE_TYPE_LEFT_Y = 16 * 5;
+const TEXTURE_TYPE_RIGHT_X = 16 * 3;
+const TEXTURE_TYPE_RIGHT_Y = 16 * 5;
+const TEXTURE_TYPE_BOTTOM_X = 16 * 14;
+const TEXTURE_TYPE_BOTTOM_Y = 16 * 2;
+const TEXTURE_TYPE_CENTER_X = 16 * 2;
+const TEXTURE_TYPE_CENTER_Y = 16 * 5;
+
 class Explosion {
   constructor(context, options) {
     this.context = context;
 
     this.img = sprite.get('assets/texture.png');
 
-    this.width = 16;
-    this.height = 16;
-
     this.x = options.x;
     this.y = options.y;
 
-    this.type = options.type;
+    this.timer = options.timer;
+
+    audioPlayer.play('explosion');
+  }
+
+  drawTile(x, y, sx, sy) {
+    this.context.drawImage(this.img, sx, sy, 16, 16, x, y, 16, 16);
   }
 
   draw() {
     if(this.img) {
-      var dx, dy;
-
-      switch(this.type) {
-        case EXPLOSION_TYPE_TOP:
-          dx = 16 * 14
-          dy = 16 * 0
-          break;
-        case EXPLOSION_TYPE_LEFT:
-          dx = 16 * 0
-          dy = 16 * 5
-          break;
-        case EXPLOSION_TYPE_RIGHT:
-          dx = 16 * 3
-          dy = 16 * 5
-          break;
-        case EXPLOSION_TYPE_BOTTOM:
-          dx = 16 * 14
-          dy = 16 * 2
-          break;
-        case EXPLOSION_TYPE_CENTER:
-          dx = 16 * 2
-          dy = 16 * 5
-          break;
-      }
-      this.context.drawImage(
-        this.img,
-        dx,
-        dy,
-        this.width,
-        this.height,
-        this.x,
-        this.y,
-        this.width,
-        this.height
-      );
+      this.drawTile(this.x, this.y - 16, TEXTURE_TYPE_TOP_X, TEXTURE_TYPE_TOP_Y)
+      this.drawTile(this.x, this.y + 16, TEXTURE_TYPE_BOTTOM_X, TEXTURE_TYPE_BOTTOM_Y)
+      this.drawTile(this.x + 16, this.y, TEXTURE_TYPE_RIGHT_X, TEXTURE_TYPE_RIGHT_Y)
+      this.drawTile(this.x - 16, this.y, TEXTURE_TYPE_LEFT_X, TEXTURE_TYPE_LEFT_Y)
+      this.drawTile(this.x, this.y, TEXTURE_TYPE_CENTER_X, TEXTURE_TYPE_CENTER_Y)
     }
   }
 }

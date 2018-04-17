@@ -1,13 +1,16 @@
 class Client {
-  constructor() {
-    let clientId = localStorage.getItem('clientId');
+  constructor(username) {
+    let id = localStorage.getItem('clientId');
 
-    if(!clientId) {
-      clientId = uuid();
-      localStorage.setItem('clientId', clientId);
+    localStorage.setItem('clientUsername', username)
+
+    if(!id) {
+      id = uuid();
+      localStorage.setItem('clientId', id);
     }
 
-    this.id = clientId;
+    this.id = id;
+    this.username = username;
   }
 }
 

@@ -1,0 +1,2 @@
+!function(d,P){'ready'in d||(d.ready=new P(function(r){d.addEventListener('DOMContentLoaded',r,{once:!0})}))}
+(document,this.Promise||function(c,q,r){q=[];c(function(e){for(r=e;q.length;)q.shift()(r)});this.then=function(c){r?setTimeout(c,0,r):q.push(c);return this}});

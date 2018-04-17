@@ -3,48 +3,61 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-var CONST = require('../shared/constants');
-
 app.use(express.static('client'));
 app.use(express.static('shared'));
+
+const { 
+  TILE_TYPE_GRASS, 
+  TILE_TYPE_OBSTACLE_BUSH,
+  TILE_TYPE_OBSTACLE_BALL,
+  TILE_TYPE_OBSTACLE_BOX,
+  TILE_TYPE_TREE_BOTTOM_RIGHT,
+  TILE_TYPE_TREE_BOTTOM_LEFT,
+  TILE_TYPE_TREE_TOP_LEFT,
+  TILE_TYPE_TREE_TOP_RIGHT,
+  FIGURE_DIRECTION_TOP,
+  FIGURE_DIRECTION_BOTTOM,
+  FIGURE_DIRECTION_RIGHT,
+  FIGURE_DIRECTION_LEFT,
+} = require('../shared/constants.js');
+
+function strToColor(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = '#';
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xFF;
+    colour += ('00' + value.toString(16)).substr(-2);
+  }
+  return colour;
+}
+
+function randomPick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getRandomPositionOnField() {
-  // +1 and -1 to prevent spawning on the borders
-  let x = random(0 + 1, 15 - 2) * 16;
-  let y = random(0 + 1, 15 - 2) * 16;
+var distance = require('./lib/distance.js')
+var distanceObjects = require('./lib/distance-objects.js')
 
-  return { x, y };
-}
-
+var PlayerStatistics = require('./components/player-statistics');
 var tilesGenerator = require('./components/tilesGenerator');
 var Player = require('./components/player');
+var Bomb = require('./components/bomb');
+var Explosion = require('./components/explosion');
 
-function distance({px, py, x, y, width, height}) {
-  dx = Math.max(Math.abs(px - x) - width / 2, 0);
-  dy = Math.max(Math.abs(py - y) - height / 2, 0);
-  return dx * dx + dy * dy;
-}
-
-function distanceObjects(a, b) {
-  return distance({
-    px: a.x,
-    py: a.y,
-    x: b.x,
-    y: b.y,
-    width: 16,
-    height: 16
-  });
-}
+let playerStats = new PlayerStatistics();
 
 class World {
-  constructor(timerCallback) {
+  constructor(updateFn) {
     this.config = {
-      tileColumns: 15,
-      tileRows: 15,
+      tileColumns: 32,
+      tileRows: 32,
       tileWidth: 16,
       tileHeight: 16
     }
@@ -57,75 +70,127 @@ class World {
     this.width = this.config.tileColumns * this.config.tileWidth;
     this.height = this.config.tileRows * this.config.tileHeight;
 
-    setInterval(timestamp => {
-
-      this.explosions.forEach(e => e.timer--);
-      this.explosions = this.explosions.filter(e => e.timer > 0)
-
-      this.bombs.forEach((b, i) => {
-        b.timer -= 1;
-        if(b.timer <= -1) this.bombs.splice(i, 1);
-
-        if(b.timer == 0) {
-          this.explosions.push({ type: CONST.EXPLOSION_TYPE_CENTER, timer: 1, x: b.x, y: b.y });
-          this.explosions.push({ type: CONST.EXPLOSION_TYPE_LEFT, timer: 1, x: b.x - 16, y: b.y });
-          this.explosions.push({ type: CONST.EXPLOSION_TYPE_RIGHT, timer: 1, x: b.x + 16, y: b.y });
-          this.explosions.push({ type: CONST.EXPLOSION_TYPE_TOP, timer: 1, x: b.x, y: b.y - 16 });
-          this.explosions.push({ type: CONST.EXPLOSION_TYPE_BOTTOM, timer: 1, x: b.x, y: b.y + 16 });
-        }
-
-        Object
-          .keys(this.players)
-          .forEach((key, index) => {
-            this.explosions.forEach((explosion) => {
-              if(!distanceObjects(this.players[key], explosion)) {
-                this.players[key].kill();
-                setTimeout(() => {
-                  let { x, y } = getRandomPositionOnField();
-                  this.players[key].resurrect(x, y);
-                }, 3 * 1000)
-              }
-            })
-          });
-      });
-
-      timerCallback();
-    }, 1 * 1000)
+    this.updateFn = updateFn;
   }
 
-  addPlayer(clientId) {
+  getRandomPositionForNewPlayer(clientId) {
+    let nonObstacleTiles = this.tiles.filter(t => t.type == TILE_TYPE_GRASS);
+    let nonObstacleTile = randomPick(nonObstacleTiles);
 
-    let playerNumber = Object.keys(this.players).length + 1;
-    let { x, y } = getRandomPositionOnField();
+    return { x: nonObstacleTile.x, y: nonObstacleTile.y };
+  }
 
-    this.players[clientId] = new Player({
-      id: clientId,
+  onExplosion() {
+    this.explosions.forEach((explosion) => {
+
+      // check if player got hit
+      Object.keys(this.players).forEach((key, index) => {
+        if(explosion.interfersWith(this.players[key])) {
+
+          playerStats.increaseDies(key);
+          this.players[key].kill();
+
+          // make sure you didn't kill yourself
+          if(this.players[explosion.from] && !this.players[explosion.from].dead) {
+            playerStats.increaseKills(explosion.from);
+          }
+
+          setTimeout(() => {
+            let { x, y } = this.getRandomPositionForNewPlayer(key);
+            // make sure the player didn't leave
+            if(this.players[key]) this.players[key].resurrect(x, y);
+            this.updateFn();
+          }, 3 * 1000)
+        }
+      })
+
+
+      // check if ball tiles should explode
+      let ballTiles = this.tiles.filter(t => t.type === TILE_TYPE_OBSTACLE_BALL);
+
+      ballTiles.forEach(tile => {
+        if(explosion.interfersWith(tile)) {
+          let newExplosion = new Explosion({ 
+            x: tile.x,
+            y: tile.y,
+            timer: 0.2,
+            from: explosion.from,
+            removeFn: () => {
+              this.explosions.splice(0, 1);
+              this.updateFn();
+            }
+          });
+          this.explosions.push(newExplosion)
+          this.tiles[this.tiles.indexOf(tile)].type = TILE_TYPE_GRASS;
+          this.onExplosion();
+        }
+      })
+
+      // check if box tile got destroyed
+      let boxTiles = this.tiles.filter(t => t.type === TILE_TYPE_OBSTACLE_BOX);
+
+      boxTiles.forEach(boxTile => {
+        if(explosion.interfersWith(boxTile)) {
+          this.tiles[this.tiles.indexOf(boxTile)].type = TILE_TYPE_GRASS;
+        }
+      })
+    });
+  }
+
+  addPlayer(client) {
+
+    if(!playerStats.get(client.id)) {
+      playerStats.add(client.id);
+    }
+
+    let { x, y } = this.getRandomPositionForNewPlayer(client.id);
+
+    this.players[client.id] = new Player({
+      id: client.id,
+      username: client.username,
+      color: strToColor(client.id),
       x: x,
       y: y,
       width: 16,
       height: 16,
-      type: playerNumber,
-      number: playerNumber
+      direction: FIGURE_DIRECTION_BOTTOM,
+      type: randomPick([1,2,3,4])
     });
 
-    return this.players[clientId];
+    return this.players[client.id];
   }
 
   removePlayer(clientId) {
+    playerStats.remove(clientId)
     delete this.players[clientId];
   }
 
   movePlayer(clientId, { direction }) {
-    if(this.players[clientId].dead) return;
+    if(
+      !this.players[clientId] ||
+      this.players[clientId].dead
+    ) return;
 
     let destX = this.players[clientId].x;
     let destY = this.players[clientId].y;
 
     switch(direction) {
-      case 'up': destY -= 16; break;
-      case 'down': destY += 16; break;
-      case 'right': destX += 16; break;
-      case 'left': destX -= 16; break;
+      case 'up': 
+        destY -= 16; 
+        this.players[clientId].direction = FIGURE_DIRECTION_TOP;
+        break;
+      case 'down': 
+        destY += 16; 
+        this.players[clientId].direction = FIGURE_DIRECTION_BOTTOM;
+        break;
+      case 'right': 
+        destX += 16; 
+        this.players[clientId].direction = FIGURE_DIRECTION_RIGHT;
+        break;
+      case 'left': 
+        destX -= 16; 
+        this.players[clientId].direction = FIGURE_DIRECTION_LEFT;
+        break;
     }
 
     // block outside of canvas
@@ -147,7 +212,18 @@ class World {
         height: this.players[clientId].height,
       });
 
-      if(!dis && this.tiles[i].type === 3) {
+      if(
+        !dis && 
+        [
+          TILE_TYPE_OBSTACLE_BUSH, 
+          TILE_TYPE_OBSTACLE_BALL,
+          TILE_TYPE_OBSTACLE_BOX,
+          TILE_TYPE_TREE_BOTTOM_RIGHT,
+          TILE_TYPE_TREE_BOTTOM_LEFT,
+          TILE_TYPE_TREE_TOP_LEFT,
+          TILE_TYPE_TREE_TOP_RIGHT
+        ].indexOf(this.tiles[i].type) !== -1
+      ) {
         return;
       }
     }
@@ -185,9 +261,13 @@ class World {
 
     this.explosions.forEach(e => {
       if(!distanceObjects(this.players[clientId], e)) {
+        console.log(explosion.from, clientId);
+        if(explosion.from === clientId) {
+          playerStats.increaseKills(clientId);
+        }
         this.players[clientId].kill();
         setTimeout(() => {
-          let { x, y } = getRandomPositionOnField();
+          let { x, y } = this.getRandomPositionForNewPlayer(clientId);
           this.players[clientId].resurrect(x, y);
         }, 3 * 1000)
       }
@@ -195,37 +275,77 @@ class World {
   }
 
   plantPlayer(clientId) {
-    // only 3 bombs per player
-    if(this.bombs.filter(b => b.from == this.players[clientId].id).length >= 10) return;
+    // 10 bombs per player
+    if(this.bombs.filter(b => b.from == this.players[clientId].id).length >= 10) {
+      return;
+    }
 
-    this.bombs.push({
-      from: this.players[clientId].id,
+    // prevent player from planting twice
+    for (var i = 0; i < this.bombs.length; i++) {
+      if(!distanceObjects(this.players[clientId], this.bombs[i])) {
+        return;
+      }
+    }
+
+    var bx = this.players[clientId].x;
+    var by = this.players[clientId].y;
+    var bi = this.bombs.length;
+    var ei = this.explosions.length;
+
+    var bomb = new Bomb({
+      from: clientId,
       timer: 3,
       x: this.players[clientId].x,
-      y: this.players[clientId].y
-    })
+      y: this.players[clientId].y,
+      updateFn: this.updateFn,
+      detonatedFn: () => {
+        this.bombs.splice(0, 1);
+        var explosion = new Explosion({ 
+          x: bx,
+          y: by,
+          from: clientId,
+          timer: 0.2,
+          removeFn: () => {
+            this.explosions.splice(0, 1);
+            this.updateFn();
+          }
+        });
+        this.explosions.push(explosion);
+        this.onExplosion();
+        this.updateFn();
+      }
+    });
+
+    this.bombs.push(bomb)
   }
 
   getData() {
     return {
-      players: Object.keys(this.players).map((key, i) => { return this.players[key].serialize() }),
+      players: Object.keys(this.players).map((key, i) => { 
+        this.players[key].stats = playerStats.get(key);
+        return this.players[key].serialize() 
+      }),
       tiles: this.tiles,
-      bombs: this.bombs,
-      explosions: this.explosions
+      bombs: this.bombs.map(b => b.serialize()),
+      explosions: this.explosions.map(e => e.serialize())
     }
   }
 }
 
-var world = new World(() => {
+var world = new World(function updateFn() {
   io.sockets.emit('update_world', world.getData())
 });
 
 io.on('connection', (socket) => {
+  socket.emit('initialize_world', world.getData())
+
   socket.on('player_join', (client) => {
 
     socket.clientId = client.id;
+    socket.clientUsername = client.username;
 
-    world.addPlayer(client.id);
+    let newPlayer = world.addPlayer(client);
+
     io.sockets.emit('update_world', world.getData())
   })
 
@@ -243,6 +363,13 @@ io.on('connection', (socket) => {
     world.removePlayer(socket.clientId);
     io.sockets.emit('update_world', world.getData())
   })
+
+  socket.on('player_leave', () => {
+    world.removePlayer(socket.clientId);
+    io.sockets.emit('update_world', world.getData())
+  })
+
+  socket.on('latency', (timestamp, fn) => fn(timestamp)); 
 });
 
 http.listen(3000, function(){
