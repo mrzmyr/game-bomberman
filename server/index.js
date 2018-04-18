@@ -3,7 +3,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 app.use(express.static('client'));
 app.use(express.static('shared'));
