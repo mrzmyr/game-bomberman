@@ -2,7 +2,7 @@ class AudioPlayer {
   constructor(args) {
     this.sounds = {};
 
-    ['explosion.mp3', 'bg.wav', 'plant.mp3', 'bg-2.wav', 'click.wav'].map(a => {
+    ['explosion.mp3', 'bg.mp3', 'plant.mp3', 'bg-2.mp3', 'click.mp3'].map(a => {
       let name = a.split('.');
       this.sounds[name[0]] = new Audio(`assets/${a}`);
     })
