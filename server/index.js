@@ -3,6 +3,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+const PORT = 8080;
+
 app.use(express.static('client'));
 app.use(express.static('shared'));
 
@@ -372,6 +374,6 @@ io.on('connection', (socket) => {
   socket.on('latency', (timestamp, fn) => fn(timestamp)); 
 });
 
-http.listen(3000, function(){
-  console.log('listening on *:3000');
+http.listen(PORT, function(){
+  console.log(`listening on *:${PORT}`);
 });
