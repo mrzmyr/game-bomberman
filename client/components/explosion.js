@@ -21,6 +21,14 @@ class Explosion {
     this.timer = options.timer;
 
     audioPlayer.play('explosion');
+    this.animateGame();
+  }
+
+  animateGame() {
+    document.querySelector('#game').classList.add('effect-shake');
+    setTimeout(() => {
+      document.querySelector('#game').classList.remove('effect-shake');
+    }, 400)
   }
 
   drawTile(x, y, sx, sy) {

@@ -216,6 +216,24 @@ h1 span:nth-child(9) { -webkit-animation-delay: .8s; }
   color: #FFF;
 }
 
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-3px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(6px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-10px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(10px, 0, 0);
+  }
+}
+
 @keyframes blink {
   0% {
     opacity: 0;
@@ -235,5 +253,12 @@ h1 span:nth-child(9) { -webkit-animation-delay: .8s; }
   background: url(assets/texture.png) left -64px top 0;
   vertical-align: middle;
   animation: blink 0.7s infinite;
+}
+
+.effect-shake {
+  animation-name: shake;
+  transform-origin: center bottom;
+  animation-duration: 0.4s;
+  animation-fill-mode: both;
 }
 
