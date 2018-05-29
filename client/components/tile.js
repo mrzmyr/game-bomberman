@@ -65,6 +65,22 @@ class Tile {
           this.x, this.y, this.width, this.height
         );
       }
+      if(this.type === TILE_TYPE_OBSTACLE_STONE_3D) {
+        this.context.drawImage(
+          this.img,
+          10 * 16, 4 * 16,
+          this.width, this.height,
+          this.x, this.y, this.width, this.height
+        );
+      }
+      if(this.type === TILE_TYPE_OBSTACLE_STONE_FLAT) {
+        this.context.drawImage(
+          this.img,
+          10 * 16, 5 * 16,
+          this.width, this.height,
+          this.x, this.y, this.width, this.height
+        );
+      }
       if(this.type === TILE_TYPE_OBSTACLE_BALL) {
         this.context.drawImage(
           this.img,
