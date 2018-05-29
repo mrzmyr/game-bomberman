@@ -21,6 +21,8 @@ const {
   FIGURE_DIRECTION_BOTTOM,
   FIGURE_DIRECTION_RIGHT,
   FIGURE_DIRECTION_LEFT,
+  TILE_TYPE_BOOST_BOMB,
+  BOOST_TYPE_BOMB,
 } = require('../shared/constants.js');
 
 function strToColor(str) {
@@ -48,7 +50,7 @@ var distance = require('./lib/distance.js')
 var distanceObjects = require('./lib/distance-objects.js')
 
 var PlayerStatistics = require('./components/player-statistics');
-var tilesGenerator = require('./components/tilesGenerator');
+var WorldGenerator = require('./components/world-generator');
 var Player = require('./components/player');
 var Bomb = require('./components/bomb');
 var Explosion = require('./components/explosion');
@@ -64,8 +66,13 @@ class World {
       tileHeight: 16
     }
 
+    const worldGenerator = new WorldGenerator(this.config);
+
+    worldGenerator.generate();
+
     this.players = {};
-    this.tiles = tilesGenerator(this.config);
+    this.tiles = worldGenerator.getTiles();
+    this.boosts = worldGenerator.getBoosts();
     this.bombs = [];
     this.explosions = [];
 
@@ -139,7 +146,7 @@ class World {
     });
   }
 
-  addPlayer(client) {
+  addPlayer(socket, client) {
 
     if(!playerStats.get(client.id)) {
       playerStats.add(client.id);
@@ -148,6 +155,8 @@ class World {
     let { x, y } = this.getRandomPositionForNewPlayer(client.id);
 
     this.players[client.id] = new Player({
+      socket,
+      updateFn: this.updateFn,
       id: client.id,
       username: client.username,
       color: strToColor(client.id),
@@ -261,9 +270,19 @@ class World {
     this.players[clientId].x = destX;
     this.players[clientId].y = destY;
 
+    this.boosts.forEach(b => {
+      if(!distanceObjects(this.players[clientId], b)) {
+        this.boosts.splice(this.boosts.indexOf(b), 1);
+        this.updateFn();
+        if(b.type == TILE_TYPE_BOOST_BOMB) {
+          this.players[clientId].socket.emit('got_boost', BOOST_TYPE_BOMB);
+          this.players[clientId].addBoost(BOOST_TYPE_BOMB);
+        }
+      }
+    })
+
     this.explosions.forEach(e => {
       if(!distanceObjects(this.players[clientId], e)) {
-        console.log(explosion.from, clientId);
         if(explosion.from === clientId) {
           playerStats.increaseKills(clientId);
         }
@@ -278,7 +297,9 @@ class World {
 
   plantPlayer(clientId) {
     // 10 bombs per player
-    if(this.bombs.filter(b => b.from == this.players[clientId].id).length >= 10) {
+    let allowedBombs = this.players[clientId].boosts.indexOf(BOOST_TYPE_BOMB) !== -1 ? 5 : 1;
+
+    if(this.bombs.filter(b => b.from == this.players[clientId].id).length >= allowedBombs) {
       return;
     }
 
@@ -329,7 +350,8 @@ class World {
       }),
       tiles: this.tiles,
       bombs: this.bombs.map(b => b.serialize()),
-      explosions: this.explosions.map(e => e.serialize())
+      explosions: this.explosions.map(e => e.serialize()),
+      boosts: this.boosts.map(b => b.serialize())
     }
   }
 }
@@ -346,7 +368,7 @@ io.on('connection', (socket) => {
     socket.clientId = client.id;
     socket.clientUsername = client.username;
 
-    let newPlayer = world.addPlayer(client);
+    let newPlayer = world.addPlayer(socket, client);
 
     io.sockets.emit('update_world', world.getData())
   })

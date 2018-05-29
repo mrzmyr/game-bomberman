@@ -3,9 +3,7 @@ let socket = io();
 function onInitalizeWorld() {
   return new Promise((resolve, reject) => {
     socket.on('connect', function() {
-      socket.on('initialize_world', function (initialData) {    
-        resolve(initialData);
-      });
+      socket.on('initialize_world', resolve);
     });
   });
 }
@@ -99,14 +97,33 @@ Promise.all([
   socket.on('update_world', function(data) {
     world.update(data);
 
-    playerDashboardDiv.innerHTML = '';
     let html = '';
 
     data.players.forEach((p, i) => {
-      html += `<span class="player-color" style="background: ${p.color}"></span> ${p.username}, kills: ${p.stats.kills}, dies: ${p.stats.dies} <br />`
+      
+      boostHtml = '';
+
+      p.boosts.forEach(b => {
+        boostHtml += `<span class="boost-bomb-icon"></span>`;
+      })
+
+      html += `
+        <span class="player-color" style="background: ${p.color}"></span> 
+        ${boostHtml}
+        ${p.username}, kills: ${p.stats.kills}, dies: ${p.stats.dies} <br />
+      `
     })
 
     playerDashboardDiv.innerHTML = html;
+  });
+
+  socket.on('got_boost', function(boost) {
+    document.querySelector('#game').classList.add('effect-boost-pickup');
+    setTimeout(() => {
+      document.querySelector('#game').classList.remove('effect-boost-pickup');
+    }, 100)
+
+    audioPlayer.play('boost');
   });
 
   requestAnimationFrame(function loopFn(timestamp) {

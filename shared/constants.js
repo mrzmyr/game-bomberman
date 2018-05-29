@@ -13,11 +13,14 @@ const TILE_TYPE_TREE_TOP_LEFT = 5;
 const TILE_TYPE_TREE_TOP_RIGHT = 6;
 const TILE_TYPE_TREE_BOTTOM_LEFT = 7;
 const TILE_TYPE_TREE_BOTTOM_RIGHT = 8;
+const TILE_TYPE_BOOST_BOMB = 12;
 
 const FIGURE_DIRECTION_TOP = 1;
 const FIGURE_DIRECTION_BOTTOM = 2;
 const FIGURE_DIRECTION_RIGHT = 3;
 const FIGURE_DIRECTION_LEFT = 4;
+
+const BOOST_TYPE_BOMB = 1;
 
 if(typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -36,10 +39,13 @@ if(typeof module !== 'undefined' && module.exports) {
     TILE_TYPE_TREE_TOP_RIGHT,
     TILE_TYPE_TREE_BOTTOM_LEFT,
     TILE_TYPE_TREE_BOTTOM_RIGHT,
+    TILE_TYPE_BOOST_BOMB,
 
     FIGURE_DIRECTION_TOP,
     FIGURE_DIRECTION_BOTTOM,
     FIGURE_DIRECTION_RIGHT,
     FIGURE_DIRECTION_LEFT,
+
+    BOOST_TYPE_BOMB,
   }
 }

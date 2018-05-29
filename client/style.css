@@ -215,3 +215,25 @@ h1 span:nth-child(9) { -webkit-animation-delay: .8s; }
   padding: 5px 10px;
   color: #FFF;
 }
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.boost-bomb-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: url(assets/texture.png) left -64px top 0;
+  vertical-align: middle;
+  animation: blink 0.7s infinite;
+}
+

@@ -7,6 +7,7 @@ class World {
     this.players = [];
     this.bombs = [];
     this.explosions = [];
+    this.boosts = [];
 
     this.org_canvas = document.getElementById("canvasOrg");
     this.org_context = this.org_canvas.getContext("2d");
@@ -74,6 +75,13 @@ class World {
           return new Explosion(this.tmp_context, t);
         });
       }
+
+      if(!deepEqual(this.lastData.boosts, data.boosts)) {
+        this.boosts = data.boosts.map(t => {
+          return new Boost(this.tmp_context, t);
+        });
+      }
+
     } else {
       this.players = data.players.map(t => {
         return new Figure(this.tmp_context, t);
@@ -83,6 +91,9 @@ class World {
       });
       this.explosions = data.explosions.map(t => {
         return new Explosion(this.tmp_context, t);
+      });
+      this.boosts = data.boosts.map(t => {
+        return new Boost(this.tmp_context, t);
       });
     }
 
@@ -157,6 +168,7 @@ class World {
     
     this.bombs.forEach(p => p.draw());
     this.explosions.forEach(p => p.draw());
+    this.boosts.forEach(p => p.draw());
     this.players.forEach(p => p.draw());
   }
 }
