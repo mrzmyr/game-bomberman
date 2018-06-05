@@ -68,6 +68,14 @@ class WorldGenerator {
     this.config = config;
   }
 
+  getWidth() {
+    return this.config.tileColumns * this.config.tileWidth;
+  }
+
+  getHeight() {
+    return this.config.tileRows * this.config.tileHeight;
+  }
+
   setupTiles() {
     const tileWidth = this.config.tileWidth;
     const tileHeight = this.config.tileHeight;

@@ -9,6 +9,13 @@ class World {
     this.explosions = [];
     this.boosts = [];
 
+    this.lastData = {
+      players: this.players,
+      bombs: this.bombs,
+      explosions: this.explosions,
+      boosts: this.boosts,
+    }
+
     this.org_canvas = document.getElementById("canvasOrg");
     this.org_context = this.org_canvas.getContext("2d");
 
@@ -52,57 +59,30 @@ class World {
   }
 
   update(data) {
+    if(!deepEqual(this.lastData.tiles, data.tiles)) {
+      this.updateTiles(data.tiles);
+    }
 
-    if(this.lastData) {
-      if(!deepEqual(this.lastData.tiles, data.tiles)) {
-        this.updateTiles(data.tiles);
-      }
+    if(!deepEqual(this.lastData.players, data.players)) {
+      this.players = data.players.map(t => new Figure(this.tmp_context, t));
+    }
 
-      if(!deepEqual(this.lastData.players, data.players)) {
-        this.players = data.players.map(t => {
-          return new Figure(this.tmp_context, t);
-        });
-      }
+    if(!deepEqual(this.lastData.bombs, data.bombs)) {
+      this.bombs = data.bombs.map(t => new Bomb(this.tmp_context, t));
+    }
 
-      if(!deepEqual(this.lastData.bombs, data.bombs)) {
-        this.bombs = data.bombs.map(t => {
-          return new Bomb(this.tmp_context, t);
-        });
-      }
+    if(!deepEqual(this.lastData.explosions, data.explosions)) {
+      this.explosions = data.explosions.map(t => new Explosion(this.tmp_context, t));
+    }
 
-      if(!deepEqual(this.lastData.explosions, data.explosions)) {
-        this.explosions = data.explosions.map(t => {
-          return new Explosion(this.tmp_context, t);
-        });
-      }
-
-      if(!deepEqual(this.lastData.boosts, data.boosts)) {
-        this.boosts = data.boosts.map(t => {
-          return new Boost(this.tmp_context, t);
-        });
-      }
-
-    } else {
-      this.players = data.players.map(t => {
-        return new Figure(this.tmp_context, t);
-      });
-      this.bombs = data.bombs.map(t => {
-        return new Bomb(this.tmp_context, t);
-      });
-      this.explosions = data.explosions.map(t => {
-        return new Explosion(this.tmp_context, t);
-      });
-      this.boosts = data.boosts.map(t => {
-        return new Boost(this.tmp_context, t);
-      });
+    if(!deepEqual(this.lastData.boosts, data.boosts)) {
+      this.boosts = data.boosts.map(t => new Boost(this.tmp_context, t));
     }
 
     this.lastData = data;
   }
 
   draw() {
-    this.org_context.clearRect(0, 0, this.org_canvas.width, this.org_canvas.height)
-
     var sx, sy, dx, dy;
     var sWidth, sHeight, dWidth, dHeight;
 
@@ -124,7 +104,6 @@ class World {
     } else {
       followed = me;
     }
-
 
     var xDeadZone = this.org_canvas.width / 2;
     var yDeadZone = this.org_canvas.height / 2;
@@ -153,6 +132,7 @@ class World {
     if(this.tmp_canvas.width - sx < sWidth){
       sWidth = this.tmp_canvas.width - sx;
     }
+
     if(this.tmp_canvas.height - sy < sHeight){
       sHeight = this.tmp_canvas.height - sy; 
     }
@@ -163,9 +143,11 @@ class World {
     dWidth = sWidth;
     dHeight = sHeight;
 
+    this.org_context.clearRect(0, 0, this.org_canvas.width, this.org_canvas.height)
+
     this.org_context.drawImage(this.tmp_canvas, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
     this.tmp_context.drawImage(this.bg_canvas, 0, 0);
-    
+
     this.bombs.forEach(p => p.draw());
     this.explosions.forEach(p => p.draw());
     this.boosts.forEach(p => p.draw());

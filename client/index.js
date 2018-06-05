@@ -58,6 +58,8 @@ Promise.all([
   let muteButton = document.getElementById('mute')
   let headline = document.getElementById('headline')
 
+  let lastMe = null;
+
   let world = new World(initialData);
   let client;
 
@@ -94,6 +96,13 @@ Promise.all([
     world.update(data);
 
     let html = '';
+    let me = data.players.filter(p => p.id == client.id)[0];
+
+    if(lastMe && lastMe.boosts.length < me.boosts.length) {
+      audioPlayer.play('boost');
+    }
+
+    lastMe = me;
 
     data.players.forEach((p, i) => {
       
@@ -111,15 +120,6 @@ Promise.all([
     })
 
     playerDashboardDiv.innerHTML = html;
-  });
-
-  socket.on('got_boost', function(boost) {
-    document.querySelector('#game').classList.add('effect-boost-pickup');
-    setTimeout(() => {
-      document.querySelector('#game').classList.remove('effect-boost-pickup');
-    }, 100)
-
-    audioPlayer.play('boost');
   });
 
   requestAnimationFrame(function loopFn(timestamp) {

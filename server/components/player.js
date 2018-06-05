@@ -4,8 +4,6 @@ module.exports = class Player {
     this.username = options.username;
     this.color = options.color;
 
-    this.socket = options.socket;
-    
     this.x = options.x;
     this.y = options.y;
     this.width = options.width;
