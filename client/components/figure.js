@@ -1,33 +1,20 @@
-class Figure {
+class Figure extends Texture {
   constructor(context, options) {
-    this.context = context;
+    super(context, options);
 
     this.id = options.id;
-
-    this.img = sprite.get('assets/texture.png');
-
-    this.width = 16;
-    this.height = 16;
-
     this.color = options.color;
-
-    this.x = options.x;
-    this.y = options.y;
-
     this.username = options.username;
-
     this.type = options.type;
-
     this.direction = options.direction;
+    this.dead = options.dead;
 
     this.sliceX = 16;
     this.sliceY = 16 * this.type;
-
-    this.dead = options.dead;
   }
 
   draw() {
-    if(this.img)
+    if(this.img) {
       switch(this.direction) {
         case FIGURE_DIRECTION_TOP:
           this.sliceX = 0;
@@ -64,5 +51,6 @@ class Figure {
         this.width,
         this.height
       );
+    }
   }
 }

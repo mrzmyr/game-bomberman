@@ -1,16 +1,8 @@
-class Tile {
+class Tile extends Texture {
   constructor(context, options) {
-    this.context = context;
+    super(context, options);
 
     this.type = options.type;
-
-    this.img = sprite.get('assets/texture.png');
-
-    this.width = options.width;
-    this.height = options.height;
-
-    this.x = options.x;
-    this.y = options.y;
   }
 
   draw() {

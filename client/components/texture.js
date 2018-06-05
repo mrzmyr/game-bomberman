@@ -1,13 +1,17 @@
-class Bomb extends Texture {
+class Texture {
   constructor(context, options) {
-    super(context, options);
+    this.context = context;
 
-    this.timer = options.timer;
+    this.img = sprite.get('assets/texture.png');
 
-    this.detonated = options.detonated;
+    this.x = options.x || 0;
+    this.y = options.y || 0;
 
-    this.sliceX = 16 * 5 + this.timer * 16;
-    this.sliceY = 16 * 5;
+    this.width = options.width || 16;
+    this.height = options.height || 16;
+
+    this.sliceX = 0;
+    this.sliceY = 0;
   }
 
   draw() {
