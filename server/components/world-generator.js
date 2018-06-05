@@ -32,32 +32,24 @@ function treeTiles(x, y) {
     type: TILE_TYPE_TREE_TOP_LEFT,
     x: x,
     y: y,
-    width: 16,
-    height: 16
   }));
 
   tiles.push(new Tile({
     type: TILE_TYPE_TREE_TOP_RIGHT,
     x: x + 16,
     y: y,
-    width: 16,
-    height: 16
   }));
 
   tiles.push(new Tile({
     type: TILE_TYPE_TREE_BOTTOM_LEFT,
     x: x,
     y: y + 16,
-    width: 16,
-    height: 16
   }));
 
   tiles.push(new Tile({
     type: TILE_TYPE_TREE_BOTTOM_RIGHT,
     x: x + 16,
     y: y + 16,
-    width: 16,
-    height: 16
   }));
 
   return tiles;

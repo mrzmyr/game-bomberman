@@ -3,7 +3,6 @@ class Bomb extends Texture {
     super(context, options);
 
     this.timer = options.timer;
-
     this.detonated = options.detonated;
 
     this.sliceX = 16 * 5 + this.timer * 16;
