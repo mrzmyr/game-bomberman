@@ -8,7 +8,7 @@ class AudioPlayer {
       'bomb.mp3', 
       'bg.mp3', 
       'click.mp3',
-      'boost.wav'
+      'boost.mp3'
     ].map(a => {
       let name = a.split('.');
       this.sounds[name[0]] = new Audio(`assets/${a}`);
