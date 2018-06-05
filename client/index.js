@@ -61,12 +61,9 @@ Promise.all([
   let world = new World(initialData);
   let client;
 
-  audioPlayer.play('bg-2')
-
   leaveButton.addEventListener('click', (event) => {
     audioPlayer.play('click')
-    audioPlayer.stop('bg')
-    audioPlayer.play('bg-2')
+    audioPlayer.pause('bg')
     joinForm.style.display = 'flex';
     gameMenu.style.display = 'none';
     headline.classList.add('animate')
@@ -87,7 +84,6 @@ Promise.all([
       client = new Client(usernameInput.value);
       addClient(client, socket);
       audioPlayer.play('bg')
-      audioPlayer.stop('bg-2')
       joinForm.style.display = 'none';
       headline.classList.remove('animate')
       gameMenu.style.display = 'block';

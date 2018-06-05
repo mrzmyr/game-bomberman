@@ -4,9 +4,9 @@ class AudioPlayer {
 
     [
       'explosion.mp3', 
-      'bg.mp3', 
       'plant.mp3', 
-      'bg-2.mp3', 
+      'bomb.mp3', 
+      'bg.mp3', 
       'click.mp3',
       'boost.wav'
     ].map(a => {
