@@ -8,4 +8,12 @@ module.exports = class Tile {
     this.x = options.x;
     this.y = options.y;
   }
+
+  serialize() {
+    return {
+      x: this.x,
+      y: this.y,
+      type: this.type,
+    }
+  }
 }

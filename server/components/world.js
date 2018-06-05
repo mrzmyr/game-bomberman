@@ -116,9 +116,7 @@ module.exports = class World {
           this.boosts.push(new Boost({
             type: TILE_TYPE_BOOST_BOMB,
             x: boxTile.x,
-            y: boxTile.y,
-            width: 16,
-            height: 16
+            y: boxTile.y
           }))
         }
       })
@@ -325,7 +323,7 @@ module.exports = class World {
         this.players[key].stats = this.playerStats.get(key);
         return this.players[key].serialize()
       }),
-      tiles: this.tiles,
+      tiles: this.tiles.map(t => t.serialize()),
       bombs: this.bombs.map(b => b.serialize()),
       explosions: this.explosions.map(e => e.serialize()),
       boosts: this.boosts.map(b => b.serialize())
