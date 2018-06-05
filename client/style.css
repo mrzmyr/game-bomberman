@@ -12,8 +12,8 @@ body {
   justify-content: center;
   flex-direction: column;
   color: #FFF;
-  /*background: url(assets/bg.png)*/
-  background: #333;
+  background: url(assets/bg.png)
+  /*background: #333;*/
 }
 
 input {
