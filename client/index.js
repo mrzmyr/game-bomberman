@@ -1,4 +1,5 @@
 let socket = io();
+let latencyTime;
 
 function onInitalizeWorld() {
   return new Promise((resolve, reject) => {
@@ -28,18 +29,12 @@ function addClient(client, socket) {
     audioPlayer.play('plant')
     socket.emit('player_plant')
   });
-
-  socket.on('disconnect', () => {
-    socket.emit('player_leave', client);
-  })
 }
 
 function removeClient(client, socket) {
   Mousetrap.reset();
   socket.emit('player_leave', client);
 }
-
-var latencyTime;
 
 Promise.all([
   sprite.preload('assets/texture.png'),
