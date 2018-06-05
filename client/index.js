@@ -43,10 +43,9 @@ var latencyTime;
 
 Promise.all([
   sprite.preload('assets/texture.png'),
-  document.ready,
   onInitalizeWorld()
 ]).then(promiseData => {
-  let initialData = promiseData[2];
+  let initialData = promiseData[1];
 
   let playerDashboardDiv = document.getElementById('player-stats');
   let latencyDiv = document.getElementById('latency')
