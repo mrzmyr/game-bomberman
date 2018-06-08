@@ -250,7 +250,7 @@ h1 span:nth-child(9) { -webkit-animation-delay: .8s; }
   display: inline-block;
   width: 16px;
   height: 16px;
-  background: url(assets/texture.png) left -64px top 0;
+  background: url(./texture.png) left -64px top 0;
   vertical-align: middle;
   animation: blink 0.7s infinite;
 }
