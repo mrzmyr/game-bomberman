@@ -1,4 +1,4 @@
-var distance = require('../lib/distance.js')
+var distance = require('../components/distance.js')
 
 module.exports = class Explosion {
   constructor(options) {

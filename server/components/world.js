@@ -20,15 +20,16 @@ const {
 const strToColor = require('string-to-color')
 const randomPick = require('random-pick')
 
-const distance = require('../lib/distance.js')
-const distanceObjects = require('../lib/distance-objects.js')
+const distance = require('./distance.js')
+const distanceObjects = require('./distance-objects.js')
 
-const Boost = require('./boost');
-const WorldGenerator = require('./world-generator');
 const PlayerStatistics = require('./player-statistics');
-const Player = require('./player');
-const Bomb = require('./bomb');
-const Explosion = require('./explosion');
+const WorldGenerator = require('./world-generator');
+
+const Boost = require('../entities/boost');
+const Player = require('../entities/player');
+const Bomb = require('../entities/bomb');
+const Explosion = require('../entities/explosion');
 
 module.exports = class World {
   constructor(updateFn) {

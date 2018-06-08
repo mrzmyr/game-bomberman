@@ -13,8 +13,8 @@ const {
   TILE_TYPE_BOOST_BOMB
 } = require('../../shared/constants.js');
 
-const Tile = require('./tile');
-const Boost = require('./boost');
+const Tile = require('../entities/tile');
+const Boost = require('../entities/boost');
 
 function random(min, max, except = []) {
   let randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
