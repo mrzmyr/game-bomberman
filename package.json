@@ -6,6 +6,8 @@
     "string-to-color": "^2.0.0"
   },
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "push": "heroku container:push web",
+    "release": "heroku container:release web"
   }
 }
