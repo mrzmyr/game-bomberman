@@ -8,6 +8,8 @@ const PORT = process.env.PORT || 8080;
 app.use(express.static('client'));
 app.use(express.static('shared'));
 
+let clients = {};
+
 var World = require('./components/world');
 
 var world = new World(function updateFn() {
@@ -22,17 +24,25 @@ io.on('connection', (socket) => {
     socket.clientId = client.id;
     socket.clientUsername = client.username;
 
+    clients[client.id] = client;
+
     let newPlayer = world.addPlayer(client);
 
     io.sockets.emit('update_world', world.getData())
   })
 
   socket.on('player_move', (data) => {
+    if(+new Date() - clients[socket.clientId].lastAct < 50) return;
+    clients[socket.clientId].lastAct = +new Date();
+
     world.movePlayer(socket.clientId, data);
     io.sockets.emit('update_world', world.getData())
   })
 
   socket.on('player_plant', () => {
+    if(+new Date() - clients[socket.clientId].lastAct < 50) return;
+    clients[socket.clientId].lastAct = +new Date();
+
     world.plantPlayer(socket.clientId);
     io.sockets.emit('update_world', world.getData())
   })

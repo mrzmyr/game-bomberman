@@ -10,17 +10,12 @@ function onInitalizeWorld() {
 }
 
 function addClient(client, socket) {
-  let timeout = +new Date();
-
   socket.emit('player_join', client);
 
   ['up', 'down', 'left', 'right'].forEach(d => {
     Mousetrap.bind(d, event => {
-      delta = +new Date() - timeout;
-      if(delta < 100) return;
       event.preventDefault();
       socket.emit('player_move', { direction: d })
-      timeout = +new Date();
     })
   })
 
